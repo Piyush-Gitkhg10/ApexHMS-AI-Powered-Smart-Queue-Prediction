@@ -45,6 +45,8 @@ app.use("/api/admin", adminRoutes);
 
 app.use("/api/ai", aiRoutes);
 
+app.use("/api/patient", require("./routes/patientRoutes"));
+
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",

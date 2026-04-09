@@ -15,6 +15,16 @@ const appointmentSchema = new mongoose.Schema(
         },
         prescription: { type: String, default: "" },
         clinicalNotes: { type: String, default: "" },
+        // ... existing fields (patient, doctor, date, time, status)
+        triageLevel: {
+            type: String,
+            enum: ["Emergency", "Urgent", "Standard", "Pending"],
+            default: "Pending",
+        },
+        triageScore: {
+            type: Number, // 1 to 100 (Higher is more critical)
+            default: 0,
+        },
     },
     { timestamps: true },
 );

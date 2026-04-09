@@ -47,7 +47,7 @@ const Login = () => {
 
       if (selectedRole === "Admin") navigate("/admin-dashboard");
       if (selectedRole === "Doctor") navigate("/doctor-dashboard");
-      if (selectedRole === "Patient") navigate("/patient-portal");
+      if (selectedRole === "Patient") navigate("/patient-dashboard");
     } catch (err) {
       setError(err.message);
     } finally {

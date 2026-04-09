@@ -3,12 +3,14 @@ const Patient = require("../models/Patient");
 const Appointment = require("../models/Appointment");
 const LabTest = require("../models/LabTest");
 const Doctor = require("../models/Doctor");
+const Medication = require("../models/Medication");
 
 const Report = require("../models/Report");
 const Settings = require("../models/Settings");
 const bcrypt = require("bcryptjs");
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const axios = require("axios");
 
 // Helper to generate a random 10-character password
 const generatePassword = () => {
@@ -18,75 +20,6 @@ const generatePassword = () => {
         () => chars[Math.floor(Math.random() * chars.length)],
     ).join("");
 };
-
-// // @desc    Get global statistics and week-over-week trends for Admin Dashboard
-// const getAdminStats = async (req, res) => {
-//     try {
-//         const now = new Date();
-//         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-//         const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-
-//         // Helper to get % change
-//         const getChange = (thisWeek, lastWeek) => {
-//             if (lastWeek === 0) return thisWeek > 0 ? 100 : 0;
-//             return (((thisWeek - lastWeek) / lastWeek) * 100).toFixed(1);
-//         };
-
-//         // 1. Fetch total counts
-//         const [totalPatients, totalDoctors, totalAppointments, totalStaff] = await Promise.all(
-//             [
-//                 Patient.countDocuments(),
-//                 Doctor.countDocuments(),
-//                 Appointment.countDocuments(),
-//                 User.countDocuments({ role: { $in: ["Admin", "Doctor"] } }),
-//             ],
-//         );
-
-//         // 2. Fetch this week's counts
-//         const [patientsThisWeek, doctorsThisWeek, appsThisWeek] = await Promise.all([
-//             Patient.countDocuments({ createdAt: { $gte: oneWeekAgo } }),
-//             Doctor.countDocuments({ createdAt: { $gte: oneWeekAgo } }),
-//             Appointment.countDocuments({ createdAt: { $gte: oneWeekAgo } }),
-//         ]);
-
-//         // 3. Fetch last week's counts
-//         const [patientsLastWeek, doctorsLastWeek, appsLastWeek] = await Promise.all([
-//             Patient.countDocuments({ createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } }),
-//             Doctor.countDocuments({ createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } }),
-//             Appointment.countDocuments({ createdAt: { $gte: twoWeeksAgo, $lt: oneWeekAgo } }),
-//         ]);
-
-//         // 4. Calculate Bed Occupancy
-//         const admittedPatients = await Patient.countDocuments({ status: "Admitted" });
-//         let settings = await Settings.findOne();
-//         if (!settings) settings = await Settings.create({ totalBeds: 500 });
-//         const totalBeds = settings.totalBeds;
-//         const occupancyRate =
-//             totalBeds > 0 ? ((admittedPatients / totalBeds) * 100).toFixed(1) : 0;
-
-//         // We'll simulate a slight random fluctuation for bed occupancy trend for realism,
-//         // since historic daily occupancy requires a complex timeline collection.
-//         const bedTrend = (Math.random() * 5 - 2).toFixed(1);
-
-//         res.json({
-//             patients: {
-//                 total: totalPatients,
-//                 trend: getChange(patientsThisWeek, patientsLastWeek),
-//             },
-//             doctors: {
-//                 total: totalDoctors,
-//                 trend: getChange(doctorsThisWeek, doctorsLastWeek),
-//             },
-//             appointments: {
-//                 total: totalAppointments,
-//                 trend: getChange(appsThisWeek, appsLastWeek),
-//             },
-//             occupancy: { rate: occupancyRate, capacity: totalBeds, trend: bedTrend },
-//         });
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
 
 // @desc    Get global statistics, trends, chart data, and predictions for Admin Dashboard
 const getAdminStats = async (req, res) => {
@@ -426,10 +359,9 @@ const getAllAppointments = async (req, res) => {
 // @desc    Create a new appointment for an existing patient
 const createAppointment = async (req, res) => {
     try {
-        // Added 'type' to the destructured body just in case the frontend sends it later
-        const { patientId, doctorId, date, time, type } = req.body;
+        const { patientId, doctorId, date, time, type, symptoms, painLevel } = req.body;
 
-        const patientProfile = await Patient.findOne({ patientId });
+        const patientProfile = await Patient.findOne({ patientId }).populate("user", "gender");
         const doctorUser = await User.findOne({ userId: doctorId });
 
         if (!patientProfile || !doctorUser) {
@@ -438,9 +370,10 @@ const createAppointment = async (req, res) => {
 
         const doctorProfile = await Doctor.findOne({ user: doctorUser._id });
 
-        const appointment = await Appointment.create({
-            appointmentId: `APT-${Math.floor(10000 + Math.random() * 90000)}`, // <-- NEW: Auto-generated ID
-            type: type || "Consultation", // <-- NEW: Default or provided type
+        // 1. Create the base appointment
+        let appointment = await Appointment.create({
+            appointmentId: `APT-${Math.floor(10000 + Math.random() * 90000)}`,
+            type: type || "Consultation",
             patient: patientProfile._id,
             doctor: doctorProfile._id,
             date,
@@ -448,6 +381,45 @@ const createAppointment = async (req, res) => {
             status: "Pending",
         });
 
+        // 2. TRIGGER THE AI TRIAGE MICROSERVICE
+        try {
+            const aiPayload = {
+                age: patientProfile.age || 30,
+                gender: patientProfile.user?.gender || "Male",
+                heart_rate: patientProfile.heartRate || 80,
+                bp_systolic: parseInt(patientProfile.bloodPressure?.split("/")[0]) || 120,
+                bp_diastolic: parseInt(patientProfile.bloodPressure?.split("/")[1]) || 80,
+                temperature: patientProfile.temperature || 98.6,
+                pain_level: painLevel || 0,
+                symptoms: symptoms || "Routine Checkup",
+            };
+
+            // Send data to your FastAPI server
+            const aiResponse = await axios.post(
+                "http://localhost:8000/predict-triage",
+                aiPayload,
+            );
+
+            // 3. Update the appointment with the AI's predictions
+            appointment.triageLevel = aiResponse.data.triageLevel;
+            appointment.triageScore = aiResponse.data.triageScore;
+            await appointment.save();
+
+            console.log(
+                `🤖 AI Triage Complete: ${appointment.triageLevel} (Score: ${appointment.triageScore})`,
+            );
+        } catch (aiError) {
+            console.error(
+                "⚠️ AI Microservice unreachable, falling back to Standard triage:",
+                aiError.message,
+            );
+            // If Python is offline, default to Standard so the booking doesn't crash
+            appointment.triageLevel = "Standard";
+            appointment.triageScore = 0;
+            await appointment.save();
+        }
+
+        // 4. Send the final response
         res.status(201).json({ message: "Appointment scheduled successfully", appointment });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -693,16 +665,67 @@ const updatePatientDetails = async (req, res) => {
     }
 };
 
-// @desc    Save prescription and complete the appointment
+// // @desc    Save prescription and complete the appointment
+// const completeConsultation = async (req, res) => {
+//     try {
+//         const { prescription } = req.body;
+//         const appointment = await Appointment.findByIdAndUpdate(
+//             req.params.appointmentId,
+//             { prescription, status: "Completed" },
+//             { new: true },
+//         );
+//         res.json({ message: "Consultation completed successfully", appointment });
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+
+// @desc    Complete consultation, save notes, and extract medications
 const completeConsultation = async (req, res) => {
     try {
         const { prescription } = req.body;
+        const appointmentId = req.params.appointmentId;
+
+        // 1. Mark appointment as completed & save the raw text using YOUR exact schema field ('prescription')
         const appointment = await Appointment.findByIdAndUpdate(
-            req.params.appointmentId,
-            { prescription, status: "Completed" },
+            appointmentId,
+            { status: "Completed", prescription: prescription },
             { new: true },
         );
-        res.json({ message: "Consultation completed successfully", appointment });
+
+        if (!appointment) return res.status(404).json({ message: "Appointment not found" });
+
+        // 2. Parse the prescription text to create individual Medication objects
+        if (prescription && prescription.includes("Rx:")) {
+            const lines = prescription.split("\n");
+            const medicationsToAdd = [];
+
+            for (let line of lines) {
+                if (line.includes("|")) {
+                    const cleanLine = line.replace(/^\d+\.\s*/, "");
+                    const parts = cleanLine.split("|").map((p) => p.trim());
+
+                    if (parts.length >= 4) {
+                        medicationsToAdd.push({
+                            patient: appointment.patient,
+                            doctor: appointment.doctor,
+                            name: parts[0],
+                            dosage: parts[1],
+                            frequency: parts[2],
+                            duration: parts[3],
+                            status: "Active",
+                        });
+                    }
+                }
+            }
+
+            // 3. Insert all the extracted medications into the database at once
+            if (medicationsToAdd.length > 0) {
+                await Medication.insertMany(medicationsToAdd);
+            }
+        }
+
+        res.json({ message: "Consultation completed and medications saved!", appointment });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
