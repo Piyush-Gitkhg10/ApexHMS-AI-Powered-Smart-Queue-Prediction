@@ -1,255 +1,400 @@
-🏥 ApexHMS
-AI-Enhanced Hospital Management System
-ApexHMS is a full-stack Hospital Management System designed to streamline core healthcare workflows while integrating AI-powered clinical assistance and patient triage. The platform combines a modern React frontend, Node.js/Express backend, MongoDB data layer, real-time communication through Socket.IO, and dedicated Python AI services. ApexHMS is a software project intended for demonstration and educational purposes. AI-generated predictions and triage recommendations should not be used as a substitute for professional medical judgment.
+# 🏥 ApexHMS - AI-Powered Hospital Management System
 
-✨ Overview
-ApexHMS brings hospital operations and AI-assisted healthcare workflows together in a single application.
-The system is organized into independent application layers:
+**Smarter Hospital Workflows · Connected Care · AI-Assisted Triage**
 
-                    ┌─────────────────────┐
-                    │     React Client    │
-                    │   Vite + Tailwind   │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │   Node.js Backend   │
-                    │ Express + MongoDB   │
-                    └──────┬────────┬─────┘
-                           │        │
-                ┌──────────┘        └──────────┐
-                ▼                              ▼
-      ┌──────────────────┐           ┌──────────────────┐
-      │   AI Engine      │           │  AI Triage       │
-      │ Python / Flask   │           │ FastAPI + ML     │
-      └──────────────────┘           └──────────────────┘
+ApexHMS is a full-stack hospital management platform designed to streamline hospital operations through patient management, doctor workflows, appointment scheduling, laboratory records, prescriptions, real-time communication, and AI-assisted healthcare utilities.
 
-The architecture keeps the main application backend independent from the Python-based AI services, making the system easier to extend and maintain.
+<p align="center">
+  <img src="https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/Node.js-Backend-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Express.js-API-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js">
+  <img src="https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB">
+  <img src="https://img.shields.io/badge/Python-AI%20Services-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-ML%20API-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+</p>
 
-🚀 Key Features:
-👨‍⚕️ Patient Management
-Patient registration and profile management
-Patient information and medical records
-Patient-specific healthcare workflows
-Secure access to patient-related information
+---
 
-🩺 Doctor Management
-Doctor profiles and management
-Doctor-specific workflows
-Appointment management
-Real-time doctor communication through Socket.IO rooms
+## 📑 Table of Contents
 
-📅 Appointment Management
-Create and manage appointments
-Appointment-related patient and doctor workflows
-Real-time communication support
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [System Architecture](#-system-architecture)
+- [Technology Stack](#-technology-stack)
+- [Getting Started](#-getting-started)
+- [API Overview](#-api-overview)
+- [Project Structure](#-project-structure)
+- [Security and Privacy](#-security-and-privacy)
+- [Future Enhancements](#-future-enhancements)
+- [Contributing](#-contributing)
+- [Author](#-author)
 
-🧪 Laboratory Management
-Manage laboratory tests
-Store and retrieve lab-test information
-Integrate test information into patient workflows
+---
 
-💊 Prescription Management
-Prescription creation and management
-Associate prescriptions with patients and healthcare workflows
+## 📌 Overview
 
-🔐 Authentication & Authorization
-User authentication
-Password hashing using bcrypt
-JWT-based authentication
-Role-aware backend architecture
-Administrative management functionality
+Healthcare facilities need reliable systems to manage patient information, appointments, prescriptions, and clinical workflows efficiently.
 
-🤖 AI-Assisted Clinical Features
-ApexHMS includes dedicated AI services for healthcare-related assistance.
-AI Diagnosis Assistance
-The AI engine provides a separate Python service for analyzing clinical notes and returning possible conditions with confidence scores.
+**ApexHMS** explores how a modular full-stack application can bring these workflows together while integrating independent AI services for diagnosis assistance and patient triage.
 
-The current implementation exposes:
-POST /predict-diagnosis
+The project combines a modern React frontend, a Node.js and Express backend, MongoDB persistence, real-time communication through Socket.IO, and Python-based AI services.
+
+### 🎯 Project Goals
+
+- Digitize essential hospital management workflows.
+- Organize patient and doctor information.
+- Simplify appointment and prescription management.
+- Support laboratory record management.
+- Enable real-time application communication.
+- Integrate machine-learning services into a full-stack application.
+- Demonstrate modular software architecture and API integration.
+
+## ✨ Key Features
+
+### 🧑‍⚕️ Hospital Management
+
+- **Patient Management** — organize patient profiles and related information.
+- **Doctor Management** — manage doctor information and associated workflows.
+- **Appointment Management** — support appointment creation and management.
+- **Prescription Management** — maintain prescription-related information.
+- **Laboratory Management** — organize laboratory tests and records.
+- **Administrative Workflows** — provide dedicated backend routes for administrative operations.
+
+### 🔐 Authentication and Security
+
+- JWT-based authentication.
+- Password hashing using `bcryptjs`.
+- Authentication middleware for protected routes.
+- Environment-based configuration for sensitive values.
+- Modular backend routes and middleware.
+
+### ⚡ Real-Time Communication
+
+- Socket.IO integration for real-time client-server communication.
+- Event-based communication between application components.
+- Doctor- and patient-specific communication rooms to support real-time features.
+
+### 🤖 AI-Assisted Healthcare
+
+#### 1. Diagnosis Assistance
+
+A Python Flask service processes clinical notes and returns possible-condition predictions with associated confidence values.
+
+The current diagnosis engine is a lightweight prototype rather than a clinically validated diagnostic system.
+
+#### 2. Intelligent Patient Triage
+
+A dedicated FastAPI service accepts patient information, symptoms, pain levels, and vital signs to predict a triage category and score using machine-learning artifacts.
+
+This demonstrates how an independent ML inference service can integrate with a larger healthcare application.
+
+> **Important:** AI predictions are intended for educational and demonstration purposes. They must not be used as a substitute for qualified medical professionals or validated clinical decision-making systems.
+
+---
+
+## 🏗️ System Architecture
+
+ApexHMS separates the user interface, backend logic, database, and AI services into distinct components.
+
+```mermaid
+flowchart TB
+    U["Hospital Staff and Users"]
+
+    FE["React + Vite Frontend"]
+    BE["Node.js + Express Backend"]
+    DB[("MongoDB Database")]
+
+    AI["Python Flask Diagnosis Service"]
+    TRIAGE["Python FastAPI Triage Service"]
+
+    DX["Diagnosis Assistance"]
+    TX["Triage Prediction"]
+
+    U --> FE
+    FE <-->|"REST API / Socket.IO"| BE
+    BE <--> DB
+
+    BE --> AI
+    BE --> TRIAGE
+
+    AI --> DX
+    TRIAGE --> TX
+
+    style FE fill:#dbeafe,stroke:#2563eb,color:#172554
+    style BE fill:#dcfce7,stroke:#16a34a,color:#14532d
+    style DB fill:#fef3c7,stroke:#d97706,color:#78350f
+    style AI fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    style TRIAGE fill:#f3e8ff,stroke:#9333ea,color:#581c87
+```
+
+### Architecture Components
+
+| Component | Responsibility |
+|---|---|
+| Frontend | User interface, navigation, and API communication |
+| Backend | Business logic, authentication, API routes, and Socket.IO |
+| MongoDB | Persistent application data |
+| Diagnosis Service | Clinical-note processing and prototype predictions |
+| Triage Service | ML-based triage inference |
+| Socket.IO | Real-time event communication |
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, React Router, Tailwind CSS |
+| UI Utilities | Axios, Lucide React, Recharts |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| Authentication | JSON Web Tokens, bcryptjs |
+| Real-Time Communication | Socket.IO |
+| Diagnosis Service | Python, Flask |
+| Triage Service | Python, FastAPI, machine-learning artifacts |
+| Development Tools | Git, npm, ESLint |
+
+---
+
+## 🚀 Getting Started
+
+Follow these instructions to set up the application locally.
+
+### Prerequisites
+
+Ensure that the following tools are installed:
+
+- [Git](https://git-scm.com/)
+- [Node.js and npm](https://nodejs.org/)
+- [Python 3](https://www.python.org/)
+- [MongoDB Community Server](https://www.mongodb.com/try/download/community)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Piyush-Gitkhg10/ApexHMS.git
+cd ApexHMS
+```
+
+### 2. Configure the Backend
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+npm install
+```
+
+Create a `.env` file inside the `backend` directory:
+
+```env
+PORT=5000
+MONGO_URI=mongodb://127.0.0.1:27017/apexhms
+JWT_SECRET=replace_with_a_secure_random_secret
+```
+
+Replace the example JWT secret with a strong, randomly generated value. Do not commit your `.env` file.
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+If the development script is unavailable, use the start script defined in the backend's `package.json`:
+
+```bash
+npm start
+```
+
+The backend is expected to run at `http://localhost:5000`.
+
+### 3. Configure the Frontend
+
+Open a new terminal from the repository root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open the URL displayed by Vite, typically:
+
+`http://localhost:5173`
+
+To build the frontend for production:
+
+```bash
+npm run build
+```
+
+### 4. Start the AI Diagnosis Service
+
+Open another terminal:
+
+```bash
+cd ai-engine
+```
+
+Install the service dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start the Flask service:
+
+```bash
+python app.py
+```
+
+The diagnosis service is expected to run at `http://localhost:5001`.
+
+### 5. Start the AI Triage Service
+
+Open another terminal:
+
+```bash
+cd ai-triage-service
+```
+
+If the service includes a `requirements.txt` file, install its dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start the FastAPI service:
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+The triage service is expected to run at `http://localhost:8000`.
+
+If interactive API documentation is enabled, visit:
+
+`http://localhost:8000/docs`
+
+### 6. Run All Services
+
+Ensure that the database and required application services are running:
+
+1. MongoDB
+2. Backend API
+3. Frontend
+4. AI diagnosis service
+5. AI triage service
+
+Confirm that the configured service URLs, environment variables, and ports match your local project configuration.
+
+> **Setup note:** The commands above assume the directory names and entry points shown in this guide. Check each service's `package.json`, Python dependency files, and source code if your local setup differs.
+
+---
+
+## 🔌 API Overview
+
+The backend organizes functionality into feature-specific route groups.
+
+| Endpoint Prefix | Purpose |
+|---|---|
+| `/api/auth` | Authentication |
+| `/api/patients` | Patient management |
+| `/api/doctors` | Doctor management |
+| `/api/appointments` | Appointment management |
+| `/api/lab-tests` | Laboratory workflows |
+| `/api/prescriptions` | Prescription management |
+| `/api/admin` | Administrative operations |
+| `/api/ai` | AI integration |
+
+The route prefixes above are a high-level overview. Refer to the backend source code for exact paths, HTTP methods, and authorization requirements.
+
+### Diagnosis Assistance API
+
+**Endpoint:** `POST /predict-diagnosis`
+
 Example request:
+
+```json
 {
   "notes": "Patient reports fever, cough and chills"
 }
+```
 
-Example response:
+Illustrative response:
+
+```json
 {
   "status": "success",
   "predictions": [
     {
-      "condition": "Influenza",
+      "condition": "Example condition",
       "confidence": 88
-    },
-    {
-      "condition": "COVID-19",
-      "confidence": 81
     }
   ]
 }
+```
 
-The current ai-engine implementation is a lightweight prototype/mock NLP service and is structured so that it can later be replaced with a production ML/NLP model.
+The example shows a possible response structure and does not represent a guaranteed prediction.
 
-🏥 AI Patient Triage
-A separate machine-learning service provides triage predictions using patient information and vital signs.
-The service accepts:
+### Patient Triage API
 
-Age
-Gender
-Heart rate
-Systolic blood pressure
-Diastolic blood pressure
-Temperature
-Pain level
-Symptoms
+The triage service provides a `/predict-triage` endpoint for patient information and triage prediction.
 
-The /predict-triage endpoint processes the input through the trained model and preprocessing artifacts before returning a predicted triage level and confidence score.
+Illustrative response:
 
-Example response:
+```json
 {
   "triageLevel": "Urgent",
   "triageScore": 87.4
 }
+```
 
-The triage service uses persisted model artifacts including:
-triage_model.pkl
-triage_encoders.pkl
-triage_imputer.pkl
-model_features.pkl
+The actual request schema and response fields depend on the current service implementation.
 
-🔌 Backend API Architecture
-The backend follows a modular route/controller architecture.
+---
 
-Main API areas include:
-/api/auth
-/api/patients
-/api/doctors
-/api/appointments
-/api/lab-tests
-/api/prescriptions
-/api/admin
-/api/ai
+## 📂 Project Structure
 
-The backend also establishes Socket.IO connections for doctor- and patient-specific communication rooms.
-The backend server runs on port 5000 by default.
+```text
+ApexHMS/
+├── frontend/           # React frontend
+├── backend/            # Express backend and API routes
+├── ai-engine/          # Flask diagnosis assistance service
+├── ai-triage-service/  # FastAPI triage service
+├── .gitignore
+└── package.json
+```
 
-⚙️ Getting Started
-Prerequisites - Make sure you have the following installed:
-Node.js
-npm
-Python 3.x
-MongoDB
-Git
+This is a simplified representation. Additional files and subdirectories may exist within each component.
 
-1. Clone the Repository:
-- git clone https://github.com/Piyush-Gitkhg10/ApexHMS.git
-- cd ApexHMS
+---
 
-2. Configure the Backend
-a. Navigate to the backend:
-- cd backend
+## 🔒 Security and Privacy
 
-b. Install dependencies:
-- npm install
+ApexHMS demonstrates foundational application-security patterns. However, production healthcare deployments require comprehensive security, privacy, and compliance reviews.
 
-c. Create a .env file:
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
+Recommended considerations include:
 
-d. Start the backend in development mode:
-- npm run dev
+- Enforce HTTPS/TLS for network communication.
+- Implement role-based access control and least-privilege permissions.
+- Validate and sanitize incoming requests.
+- Use rate limiting and appropriate security headers.
+- Store secrets securely and rotate them regularly.
+- Protect database access and maintain reliable backups.
+- Record audit trails for sensitive operations.
+- Protect patient information and apply appropriate retention policies.
+- Evaluate AI models for accuracy, bias, and reliability.
+- Require qualified human oversight for clinical decisions.
 
-Or, start normally:
-- npm start
+**Never commit passwords, API keys, production credentials, or real patient information to the repository.**
 
-The API should be available at:
-- http://localhost:5000
+---
 
-3. Start the Frontend
-a. Open another terminal:
-- cd frontend
+## 👨‍💻 Author
 
-b. Install dependencies:
-- npm install
+**Piyush Kumar**
 
-c. Start the development server:
-- npm run dev
-
-The Vite development server will normally be available at:
-- http://localhost:5173
-
-4. Start the AI Diagnosis Service
-a. Open another terminal:
-- cd ai-engine
-
-b. Install Python dependencies:
-- pip install -r requirements.txt
-
-c. Start the Flask service:
-- python app.py
-
-The AI diagnosis service runs on:
-- http://localhost:5001
-
-5. Start the AI Triage Service
-a. Open another terminal:
-- cd ai-triage-service
-
-b. Install the required Python dependencies.
-
-c. Then start FastAPI with:
-- uvicorn main:app --reload --port 8000
-
-The triage API will be available at:
-- http://localhost:8000
-
-🔄 Running the Complete System
-
-For local development, run the following services:
-Service	Port	Technology
-Frontend	5173	React + Vite
-Backend	5000	Node.js + Express
-AI Triage	8000	FastAPI
-Database	27017	MongoDB
-   
-🔐 Security Considerations
-ApexHMS includes several foundational security mechanisms:
-JWT-based authentication
-Password hashing with bcrypt
-Environment-variable based configuration
-Modular authorization middleware
-Separation of AI services from the core backend
-
-For production deployment, additional controls should be implemented, including:
-HTTPS/TLS
-Strong secret management
-Rate limiting
-Input validation and sanitization
-Security headers
-Audit logging
-Fine-grained role-based access control
-Healthcare data privacy and compliance controls
-
-🗺️ Roadmap
-- Potential future improvements include:
-- Production-grade NLP/LLM diagnosis assistance
-- Improved triage model validation and monitoring
-- Explainable AI predictions
-- Doctor-patient real-time chat
-- Notifications and reminders
-- Advanced hospital analytics
-- Role-based dashboards
-- Medical report generation
-- Cloud deployment
-- Docker-based development environment
-- Automated testing
-- CI/CD pipeline
-- Improved audit logging
-- Production-grade healthcare data security
-
-⚠️ Disclaimer
-ApexHMS is a software engineering and AI/ML project created for educational, demonstration, and portfolio purposes. The AI diagnosis and triage functionality is not a medical device and must not be relied upon for actual medical diagnosis, treatment, or emergency decisions. Always consult a qualified healthcare professional for medical advice.
-
-👨‍💻 Author
-Piyush Kumar
-GitHub: @Piyush-Gitkhg10
+- GitHub: [@Piyush-Gitkhg10](https://github.com/Piyush-Gitkhg10)
+- Repository: [ApexHMS](https://github.com/Piyush-Gitkhg10/ApexHMS)
