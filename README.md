@@ -26,7 +26,7 @@ The system is organized into independent application layers:
 
 The architecture keeps the main application backend independent from the Python-based AI services, making the system easier to extend and maintain.
 
-🚀 Key Features
+🚀 Key Features:
 👨‍⚕️ Patient Management
 Patient registration and profile management
 Patient information and medical records
@@ -67,15 +67,12 @@ The AI engine provides a separate Python service for analyzing clinical notes an
 
 The current implementation exposes:
 POST /predict-diagnosis
-
 Example request:
-
 {
   "notes": "Patient reports fever, cough and chills"
 }
 
 Example response:
-
 {
   "status": "success",
   "predictions": [
@@ -108,82 +105,16 @@ Symptoms
 The /predict-triage endpoint processes the input through the trained model and preprocessing artifacts before returning a predicted triage level and confidence score.
 
 Example response:
-
 {
   "triageLevel": "Urgent",
   "triageScore": 87.4
 }
 
 The triage service uses persisted model artifacts including:
-
 triage_model.pkl
 triage_encoders.pkl
 triage_imputer.pkl
 model_features.pkl
-
-🧠 AI / Machine Learning Architecture
-The AI components are intentionally separated from the main Node.js application.
-
-Patient Data
-     │
-     ▼
-Node.js Backend
-     │
-     ├──────────────► AI Diagnosis Service
-     │                    │
-     │                    ▼
-     │              Clinical Predictions
-     │
-     └──────────────► AI Triage Service
-                          │
-                          ▼
-                    ML Preprocessing
-                          │
-                          ▼
-                    Trained ML Model
-                          │
-                          ▼
-                  Triage Level + Score
-
-The triage service uses the same preprocessing artifacts generated during model training to transform incoming data before inference.
-
-📁 Project Structure
-ApexHMS/
-│
-├── ai-engine/
-│   ├── app.py
-│   └── requirements.txt
-│
-├── ai-triage-service/
-│   ├── main.py
-│   ├── train_triage_model.py
-│   ├── triage_dataset_csv.csv
-│   ├── triage_model.pkl
-│   ├── triage_encoders.pkl
-│   ├── triage_imputer.pkl
-│   └── model_features.pkl
-│
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── utils/
-│   ├── server.js
-│   └── package.json
-│
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   ├── index.html
-│   ├── package.json
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   └── vite.config.js
-│
-├── .gitignore
-└── package.json
 
 🔌 Backend API Architecture
 The backend follows a modular route/controller architecture.
@@ -199,26 +130,10 @@ Main API areas include:
 /api/ai
 
 The backend also establishes Socket.IO connections for doctor- and patient-specific communication rooms.
-
-Doctor
-   │
-   └── join_doctor_room
-              │
-              ▼
-        Socket.IO Room
-
-Patient
-   │
-   └── join_patient_room
-              │
-              ▼
-        Socket.IO Room
-
 The backend server runs on port 5000 by default.
 
 ⚙️ Getting Started
 Prerequisites - Make sure you have the following installed:
-
 Node.js
 npm
 Python 3.x
@@ -291,24 +206,11 @@ The triage API will be available at:
 🔄 Running the Complete System
 
 For local development, run the following services:
-
 Service	Port	Technology
 Frontend	5173	React + Vite
 Backend	5000	Node.js + Express
-AI Diagnosis	5001	Flask
 AI Triage	8000	FastAPI
 Database	27017	MongoDB
-Browser
-   │
-   ▼
-React / Vite
-   │
-   ▼
-Express API ──────────────► MongoDB
-   │
-   ├────────► Flask AI Engine
-   │
-   └────────► FastAPI Triage Service
    
 🔐 Security Considerations
 ApexHMS includes several foundational security mechanisms:
